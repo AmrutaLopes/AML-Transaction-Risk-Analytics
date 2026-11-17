@@ -15,6 +15,37 @@ REPORTS.mkdir(exist_ok=True)
 
 def run_rules():
     tx = pd.read_csv(PROCESSED / "transactions_clean.csv", parse_dates=["transaction_datetime"])
+     # Validate required columns
+    required_columns = [
+        "transaction_id",
+        "customer_id",
+        "bank_id",
+        "transaction_datetime",
+        "transaction_type",
+        "amount",
+        "counterparty_country",
+        "country_risk_score",
+        "pep_flag"
+    ]
+
+    missing = set(required_columns) - set(tx.columns)
+
+    if missing:
+        raise ValueError(f"Missing required columns: {sorted(missing)}")
+
+    # Validate transaction IDs
+    if tx["transaction_id"].duplicated().any():
+        raise ValueError("Duplicate transaction IDs detected.")
+
+    # Validate transaction amounts
+    if tx["amount"].isna().any() or (tx["amount"] < 0).any():
+        raise ValueError("Invalid transaction amounts detected.")
+
+    # Sort transactions chronologically
+    tx = tx.sort_values(
+        ["customer_id", "transaction_datetime"]
+    ).copy()
+    
     tx = tx.sort_values(["customer_id", "transaction_datetime"]).copy()
 
     # Rule 1: high-value transaction
