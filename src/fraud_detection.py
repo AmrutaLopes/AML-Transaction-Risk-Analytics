@@ -45,7 +45,7 @@ def run_rules():
     tx = tx.sort_values(
         ["customer_id", "transaction_datetime"]
     ).copy()
-    
+
     tx = tx.sort_values(["customer_id", "transaction_datetime"]).copy()
 
     # Rule 1: high-value transaction
@@ -61,13 +61,13 @@ def run_rules():
     tx["rule_high_risk_country"] = tx["country_risk_score"] >= 4
 
     # Rule 4: rapid transaction velocity
-    tx["tx_count_1h"] = (
-        tx.set_index("transaction_datetime")
-          .groupby("customer_id")["transaction_id"]
-          .rolling("1h").count()
-          .reset_index(level=0, drop=True)
-          .reindex(tx.set_index("transaction_datetime").index)
-    )
+    #tx["tx_count_1h"] = (
+    #    tx.set_index("transaction_datetime")
+    #      .groupby("customer_id")["transaction_id"]
+    #      .rolling("1h").count()
+    #      .reset_index(level=0, drop=True)
+    #      .reindex(tx.set_index("transaction_datetime").index)
+    #)
     # Recompute robustly by original row order
     tx["tx_count_1h"] = 0
     for customer, idx in tx.groupby("customer_id").groups.items():
