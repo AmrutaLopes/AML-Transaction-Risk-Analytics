@@ -25,7 +25,7 @@ The platform brings together synthetic customer, transaction, bank, and geograph
 | Pandas | Data manipulation and analysis |
 | NumPy | Numerical operations |
 | SQL | Relational modelling and risk-oriented queries |
-| PostgreSQL | Intended database environment for SQL implementation |
+| PostgreSQL | Database implementation, CSV data import, analytical views and risk-oriented SQL queries |
 | Jupyter Notebook | Exploratory analysis and documentation |
 
 ## 3. Project Architecture
@@ -188,7 +188,7 @@ The repository includes PostgreSQL-oriented SQL scripts covering:
 - Transaction and customer-level feature engineering.
 - Risk-oriented analytical queries.
 
-The scripts are provided for database implementation and further validation.
+The SQL scripts were executed and tested in PostgreSQL 18 using the synthetic project datasets.
 
 ## 10. Project Scope and Limitations
 
@@ -209,7 +209,7 @@ A production implementation would require:
 
 Potential extensions include:
 
-- PostgreSQL database integration and end-to-end SQL validation.
+- SQL query optimisation and performance analysis.
 - Interactive Tableau dashboards.
 - Machine learning-based anomaly detection.
 - Explainable customer and transaction risk scoring.
@@ -218,21 +218,11 @@ Potential extensions include:
 
 These are proposed enhancements, not currently implemented project features.
 
-## 12. Project Attribution and Licence
-
-This portfolio version builds upon the original project repository:
-
-[Original AML Transaction Risk Platform](https://github.com/zamiya80/aml-transaction-risk-platform)
-
-The original MIT licence and its copyright and permission notices are retained. Refer to the LICENSE file for the applicable licence terms.
-
 ## Author
 
 **Amruta Lopes**
 
 GitHub: [AmrutaLopes](https://github.com/AmrutaLopes)
-
-LinkedIn: Add your LinkedIn profile URL.
 
 ---
 
