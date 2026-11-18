@@ -27,6 +27,7 @@ The platform brings together synthetic customer, transaction, bank, and geograph
 | SQL | Relational modelling and risk-oriented queries |
 | PostgreSQL | Database implementation, CSV data import, analytical views and risk-oriented SQL queries |
 | Jupyter Notebook | Exploratory analysis and documentation |
+| `aml` package | Installable pipeline library with tuned thresholds, a CLI and a pytest suite |
 
 ## 3. Project Architecture
 
@@ -98,6 +99,8 @@ The workflow also produces:
 - Transaction-level analytical features.
 - Suspicious transaction alert records.
 - Aggregated alert summaries.
+- A rule breakdown (`reports/rule_hits.csv`) showing how often each rule fired.
+- A data quality record (`reports/data_quality.json`) with kept and dropped rows, referential integrity checks and alert rates.
 
 These results are based on synthetic data and illustrative monitoring rules.
 
@@ -105,6 +108,20 @@ These results are based on synthetic data and illustrative monitoring rules.
 
 ```text
 aml-transaction-risk-analytics/
+│
+├── aml/                          # installable pipeline package
+│   ├── config.py                 # thresholds, weights, risk tiers, TOML/JSON loading
+│   ├── io.py                     # CSV helpers with the repository's CRLF convention
+│   ├── cleaning.py               # cleaning plus a row-by-row drop report
+│   ├── features.py               # customer and transaction features
+│   ├── rules.py                  # monitoring rules, risk score, alert extraction
+│   ├── scoring.py                # customer risk scores and the top-N view
+│   ├── reporting.py              # alert summary, rule breakdown, data quality
+│   ├── pipeline.py               # step orchestration
+│   └── cli.py                    # the aml-risk command
+│
+├── config/
+│   └── analysis.toml             # example configuration, every key documented
 │
 ├── data/
 │   ├── raw/
@@ -116,6 +133,8 @@ aml-transaction-risk-analytics/
 │
 ├── reports/
 │   ├── alert_summary.csv
+│   ├── data_quality.json
+│   ├── rule_hits.csv
 │   └── sample_alert_report.csv
 │
 ├── sql/
@@ -124,13 +143,16 @@ aml-transaction-risk-analytics/
 │   ├── 03_feature_engineering.sql
 │   └── 04_risk_analysis.sql
 │
-├── src/
+├── src/                          # thin wrappers around aml, commands unchanged
 │   ├── customer_risk.py
 │   ├── data_cleaning.py
 │   ├── feature_engineering.py
 │   ├── fraud_detection.py
 │   └── generate_alert_report.py
 │
+├── tests/                        # pytest suite
+│
+├── pyproject.toml
 ├── project_manifest.json
 ├── project_structure.md
 ├── requirements.txt
@@ -146,37 +168,67 @@ aml-transaction-risk-analytics/
 pip install -r requirements.txt
 ```
 
-### Step 2: Clean the datasets
+Install the package if you want the `aml-risk` command and the test tooling:
+
+```bash
+pip install -e ".[dev]"
+```
+
+### Step 2: Run the whole pipeline
+
+```bash
+aml-risk all
+```
+
+The command cleans the raw datasets, rebuilds the features, applies the monitoring rules, scores customers and refreshes the reports. Each step can also be run on its own:
+
+```bash
+aml-risk clean
+aml-risk features
+aml-risk monitor
+aml-risk score
+aml-risk report
+```
+
+`aml-risk report --top 5` also prints the five highest scoring customers.
+
+### Step 3: Or run the original scripts
+
+The documented scripts from earlier versions are kept as thin wrappers, so this sequence still works and produces exactly the same files:
 
 ```bash
 python src/data_cleaning.py
-```
-
-### Step 3: Generate analytical features
-
-```bash
 python src/feature_engineering.py
-```
-
-### Step 4: Run transaction monitoring
-
-```bash
 python src/fraud_detection.py
-```
-
-### Step 5: Generate customer risk scores
-
-```bash
 python src/customer_risk.py
-```
-
-### Step 6: Generate alert reports
-
-```bash
 python src/generate_alert_report.py
 ```
 
-Generated outputs are written to the relevant `data/processed/` and `reports/` directories.
+Generated outputs are written to the relevant `data/processed/` and `reports/` directories. Runs are reproducible: a second run produces byte-identical files.
+
+### Step 4: Tune the thresholds
+
+Every threshold, weight and risk tier lives in one configuration object. Copy `config/analysis.toml`, edit what you need and pass it in:
+
+```bash
+aml-risk all --config config/analysis.toml
+```
+
+Keys that are not mentioned keep their defaults, and an unknown key is rejected with the list of accepted names, so a typo cannot silently disable a rule. A JSON file works the same way. For example, to raise the high-value threshold and lower the alert score:
+
+```toml
+[rules]
+high_value_threshold = 20000.0
+alert_threshold = 25.0
+```
+
+### Step 5: Run the tests
+
+```bash
+python -m pytest
+```
+
+The suite covers the configuration rules, the cleaning accounting, the feature windows, every monitoring rule at its boundary, the customer scoring bands, the report ordering, the pipeline end to end and the CLI. It runs against the committed synthetic datasets and pins the published numbers: 6,182 cleaned transactions, 90 alerts (55 High, 35 Medium) and 300 scored customers.
 
 ## 9. SQL Analytics
 
