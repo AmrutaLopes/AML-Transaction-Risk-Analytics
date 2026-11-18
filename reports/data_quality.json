@@ -1,0 +1,35 @@
+{
+  "rows": {
+    "raw_transactions": 6182,
+    "cleaned_transactions": 6182,
+    "dropped_total": 0,
+    "dropped_missing_keys": 0,
+    "dropped_non_positive_amount": 0,
+    "dropped_duplicate_ids": 0,
+    "customers": 300,
+    "banks": 12,
+    "locations": 20
+  },
+  "referential_integrity": {
+    "transactions_without_location": 0,
+    "transactions_without_customer": 0
+  },
+  "monitoring": {
+    "transactions_scored": 6182,
+    "alerts": 90,
+    "alert_rate": 0.014558,
+    "alert_threshold": 30.0,
+    "transactions_by_tier": {
+      "Low": 5046,
+      "Medium": 1081,
+      "High": 55,
+      "Critical": 0
+    },
+    "alerts_by_tier": {
+      "Low": 0,
+      "Medium": 35,
+      "High": 55,
+      "Critical": 0
+    }
+  }
+}
