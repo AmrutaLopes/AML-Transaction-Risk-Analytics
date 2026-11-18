@@ -1,38 +1,19 @@
+"""Customer risk scoring using transaction behaviour and KYC indicators.
+
+Thin wrapper kept so the command documented in the README still works:
+
+    python src/customer_risk.py
+
+The implementation lives in :mod:`aml.scoring`.
 """
-Customer risk scoring using transaction behaviour and KYC indicators.
-"""
+import sys
 from pathlib import Path
-import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-PROCESSED = ROOT / "data" / "processed"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-def score_customers():
-    features = pd.read_csv(PROCESSED / "customer_risk_features.csv")
-    customers = pd.read_csv(PROCESSED / "customers_clean.csv")
-
-    df = features.merge(
-        customers[["customer_id","pep_flag","kyc_status","customer_type"]],
-        on="customer_id", how="left"
-    )
-
-    score = (
-        (df["total_transaction_value"] >= 100000).astype(int) * 20 +
-        (df["average_country_risk"] >= 3).astype(int) * 20 +
-        (df["high_value_tx_count"] >= 3).astype(int) * 20 +
-        (df["velocity_24h"] >= 8).astype(int) * 20 +
-        (df["pep_flag"] == 1).astype(int) * 15 +
-        (df["kyc_status"] == "Review Required").astype(int) * 10
-    )
-
-    df["customer_risk_score"] = score
-    df["customer_risk_tier"] = pd.cut(
-        df["customer_risk_score"],
-        bins=[-1, 19, 39, 69, 999],
-        labels=["Low", "Medium", "High", "Critical"]
-    )
-    df.to_csv(PROCESSED / "customer_risk.csv", index=False)
-    print("Customer risk scoring complete.")
+from aml.cli import main  # noqa: E402  (the path has to be set up first)
 
 if __name__ == "__main__":
-    score_customers()
+    raise SystemExit(main(["score", "--root", str(ROOT)]))

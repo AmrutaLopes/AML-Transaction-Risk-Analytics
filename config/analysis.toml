@@ -1,0 +1,48 @@
+# Illustrative configuration for the AML transaction risk pipeline.
+#
+# Copy this file, edit the values you care about and pass it to the CLI:
+#
+#     aml-risk all --config config/analysis.toml
+#
+# Every key is optional: anything you leave out keeps its default, and an
+# unknown key is rejected instead of being silently ignored.
+
+[rules]
+# Transactions at or above this amount are high-value (rule 1).
+high_value_threshold = 10000.0
+# Cash deposits inside this band count as potential structuring (rule 2).
+structuring_min_amount = 7000.0
+structuring_max_amount = 9999.99
+structuring_transaction_type = "Cash Deposit"
+# Jurisdictions whose synthetic risk score reaches this value are flagged (rule 3).
+high_country_risk_threshold = 4.0
+# More than this many transactions per customer inside the window (rule 4).
+velocity_window = "1h"
+velocity_transaction_count = 8
+# PEP customers above this amount are flagged (rule 5).
+pep_amount_threshold = 5000.0
+# Rule weights and the score that turns a transaction into an alert.
+weight_high_value = 25
+weight_structuring = 30
+weight_high_risk_country = 20
+weight_velocity = 25
+weight_pep = 20
+alert_threshold = 30.0
+
+[customer_scoring]
+total_value_threshold = 100000.0
+average_country_risk_threshold = 3.0
+high_value_count_threshold = 3
+velocity_24h_threshold = 8
+points_per_indicator = 20
+pep_points = 15
+kyc_review_points = 10
+kyc_review_status = "Review Required"
+
+[tiers]
+# One more boundary than labels: [-1, 19] is Low, [19, 39] Medium, and so on.
+boundaries = [-1.0, 19.0, 39.0, 69.0, 999.0]
+labels = ["Low", "Medium", "High", "Critical"]
+
+[features]
+velocity_window = "24h"

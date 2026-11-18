@@ -1,28 +1,19 @@
+"""Creates a concise periodic alert summary from the generated alert file.
+
+Thin wrapper kept so the command documented in the README still works:
+
+    python src/generate_alert_report.py
+
+The implementation lives in :mod:`aml.reporting`.
 """
-Creates a concise periodic alert summary from the generated alert file.
-"""
+import sys
 from pathlib import Path
-import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-PROCESSED = ROOT / "data" / "processed"
-REPORTS = ROOT / "reports"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-def create_summary():
-    alerts = pd.read_csv(PROCESSED / "suspicious_alerts.csv")
-    summary = (
-        alerts.groupby(["risk_tier"])
-        .agg(
-            alert_count=("alert_id","count"),
-            total_value=("amount","sum"),
-            average_value=("amount","mean")
-        )
-        .reset_index()
-    )
-    summary["total_value"] = summary["total_value"].round(2)
-    summary["average_value"] = summary["average_value"].round(2)
-    summary.to_csv(REPORTS / "alert_summary.csv", index=False)
-    print(summary)
+from aml.cli import main  # noqa: E402  (the path has to be set up first)
 
 if __name__ == "__main__":
-    create_summary()
+    raise SystemExit(main(["report", "--root", str(ROOT)]))

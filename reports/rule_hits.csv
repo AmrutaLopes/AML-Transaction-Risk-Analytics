@@ -1,0 +1,6 @@
+rule,reason,weight,transactions,alerts
+rule_high_value,High-value transaction,25,85,39
+rule_structuring,Near-threshold cash deposit,30,42,42
+rule_high_risk_country,High-risk jurisdiction,20,992,55
+rule_velocity,Unusually high transaction velocity,25,64,8
+rule_pep,PEP with elevated transaction,20,8,1
